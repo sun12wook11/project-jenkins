@@ -12,23 +12,18 @@ pipeline {
     }
 
     stages {
-        stage('Clone from SCM') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'github_token', usernameVariable: 'GIT_CREDENTIALS_USR', passwordVariable: 'GIT_CREDENTIALS_PSW')]) {
-                        dir('project-jenkins') {
-                            git branch: 'master', url: "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${REPO_URL}"
-                        }
-                        dir('project-argocd') {
-                            git branch: 'master', url: "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${ARGOCD_REPO_URL}"
-                        }
+            stage('Clone from SCM') {
+                steps {
+                    dir('project-jenkins') {
+                        git branch: 'master', url: "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${REPO_URL}"
                     }
-                }
+                    dir('project-argocd') {
+                        git branch: 'master', url: "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${ARGOCD_REPO_URL}"
+                   }
             }
         }
-
-        stage('Docker Image Building') {
-            steps {
+    stage('Docker Image Building') {
+          steps {
                 sh '''
                 docker build -t ${DOCKER_IMAGE_OWNER}/prj-frontend:latest ./frontend
                 docker build -t ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_BUILD_TAG} ./frontend
@@ -72,7 +67,7 @@ pipeline {
         stage('Commit Changes') {
             steps {
                 dir('project-argocd') {
-                    script {
+                    script{
                         def changes = sh(script: "git status --porcelain", returnStdout: true).trim()
                         if (changes) {
                             sh '''
@@ -101,13 +96,9 @@ pipeline {
             }
         }
     }
-
     post {
         always {
-            // node 블록을 추가하여 cleanWs()를 실행합니다.
-            node {
-                cleanWs()
-            }
+            cleanWs()
         }
     }
 }
