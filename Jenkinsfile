@@ -96,11 +96,4 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            node(abc123) {
-                cleanWs()
-            }
-        }
-    }
 }
