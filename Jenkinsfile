@@ -98,7 +98,7 @@ pipeline {
     }
     post {
         always {
-            node {
+            node(abc123) {
                 cleanWs()
             }
         }
